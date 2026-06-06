@@ -4,6 +4,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -15,16 +19,30 @@ public class User {
   private Long id;
 
   private String fullName;
+
+  @NotBlank(message = "username is required")
+  private String username;
+
+  @NotBlank(message = "Email is required")
+  @Email(message = "Email is invalid")
   private String email;
   private String phone;
+
+  @NotBlank(message = "Role is required")
   private String role;
+
+  @NotBlank(message = "Password is required")
   private String password;
 
+  @CreationTimestamp
   private LocalDateTime createdAt;
+
+  @UpdateTimestamp
   private LocalDateTime updatedAt;
 
-  public User(String fullName, String email, String phone, String role, String password, LocalDateTime createdAt, LocalDateTime updatedAt) {
+  public User(String fullName, String email, String phone, String role, String password, String username, LocalDateTime createdAt, LocalDateTime updatedAt) {
     this.fullName = fullName;
+    this.username = username;
     this.email = email;
     this.phone = phone;
     this.role = role;
@@ -42,6 +60,14 @@ public class User {
 
   public void setId(Long id) {
     this.id = id;
+  }
+
+  public String getUsername() {
+    return username;
+  }
+
+  public void setUsername(String username) {
+    this.username = username;
   }
 
   public String getFullName() {

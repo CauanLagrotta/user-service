@@ -2,6 +2,7 @@ package com.cauanlagrotta.controller;
 
 import com.cauanlagrotta.model.User;
 import com.cauanlagrotta.repository.UserRepository;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -18,7 +19,7 @@ public class UserController {
   }
 
   @PostMapping("/api/users")
-  public User createUser(@RequestBody User user){
+  public User createUser(@RequestBody @Valid User user){
     return userRepository.save(user);
   }
 
