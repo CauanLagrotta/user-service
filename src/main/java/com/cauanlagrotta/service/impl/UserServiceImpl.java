@@ -46,8 +46,7 @@ public class UserServiceImpl implements UserService {
     existingUser.setEmail(user.getEmail());
     existingUser.setPhone(user.getPhone());
     existingUser.setRole(user.getRole());
-    existingUser.setPassword(user.getPassword());
-    existingUser.setUpdatedAt(LocalDateTime.now());
+    existingUser.setUsername(user.getUsername());
 
     return userRepository.save(existingUser);
   }
