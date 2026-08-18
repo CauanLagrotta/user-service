@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
@@ -71,6 +73,10 @@ public class KeycloakService {
       roles.add(role);
 
       assignRoleToUser(user.getId(), clientId, roles, ACCESS_TOKEN);
+
+    }else {
+      System.out.println("User creation failed");
+      throw new RuntimeException(response.getBody());
     }
   }
 
@@ -78,18 +84,81 @@ public class KeycloakService {
                                            String password,
                                            String grantType,
                                            String refreshToken){
-    return new TokenResponse();
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+
+    MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
+    requestBody.add("grant_type", grantType);
+    requestBody.add("username", username);
+    requestBody.add("password", password);
+    requestBody.add("refreshToken", refreshToken);
+    requestBody.add("client_id", CLIENT_ID);
+    requestBody.add("client_secret", CLIENT_SECRET);
+    requestBody.add("scope", scope);
+
+    HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(requestBody, headers);
+
+    ResponseEntity<TokenResponse> response = restTemplate.exchange(
+        TOKEN_URL,
+        HttpMethod.POST,
+        requestEntity,
+        TokenResponse.class
+    );
+
+    if(response.getStatusCode() == HttpStatus.OK && response.getBody() != null){
+      return response.getBody();
+    }
+
+    throw new RuntimeException("Failed to obtain access token");
   }
 
   public KeycloakRole getRoleByName(String clientId,
                                     String token,
                                     String role){
 
-    return null;
+    String url = KEYCLOAK_BASE_URL + "/admin/realms/master/clients/" + clientId + "/roles/" + role;
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.set("Authorization", "Bearer " + token);
+    headers.setContentType(MediaType.APPLICATION_JSON);
+
+    HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+
+    ResponseEntity<KeycloakRole> response = restTemplate.exchange(
+        url,
+        HttpMethod.GET,
+        requestEntity,
+        KeycloakRole.class
+    );
+
+    return response.getBody();
+
   }
 
   public KeycloakUserDTO fetchFirstUserByUsername(String username, String token){
-    return null;
+    String url = KEYCLOAK_BASE_URL + "/admin/realms/master/clients/users?username=" + username;
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.setBearerAuth(token);
+    headers.setContentType(MediaType.APPLICATION_JSON);
+
+    HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+
+    ResponseEntity<KeycloakUserDTO[]> response = restTemplate.exchange(
+        url,
+        HttpMethod.GET,
+        requestEntity,
+        KeycloakUserDTO[].class
+    );
+
+    KeycloakUserDTO[] users = response.getBody();
+
+    if(users != null && users.length > 0){
+      return users[0];
+    }
+
+    throw new RuntimeException("User not found with username " + username);
   }
 
   public void assignRoleToUser(String userId,
