@@ -75,7 +75,6 @@ public class KeycloakService {
       assignRoleToUser(user.getId(), clientId, roles, ACCESS_TOKEN);
 
     }else {
-      System.out.println("User creation failed");
       throw new RuntimeException(response.getBody());
     }
   }
@@ -166,5 +165,23 @@ public class KeycloakService {
                                List<KeycloakRole> roles,
                                String token){
 
+    String url = KEYCLOAK_BASE_URL + "/admin/realms/master/users/" + userId + "/role-mappings/clients/" + clientId;
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.setBearerAuth(token);
+    headers.setContentType(MediaType.APPLICATION_JSON);
+
+    HttpEntity<List<KeycloakRole>> requestEntity = new HttpEntity<>(roles, headers);
+
+    try {
+      ResponseEntity<String> response = restTemplate.exchange(
+          url,
+          HttpMethod.POST,
+          requestEntity,
+          String.class
+      );
+    }catch (Exception e){
+      throw new RuntimeException("Failed to assign new role");
+    }
   }
 }
