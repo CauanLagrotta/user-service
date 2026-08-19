@@ -1,5 +1,6 @@
 package com.cauanlagrotta.model;
 
+import com.cauanlagrotta.domain.UserRole;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -30,10 +31,10 @@ public class User {
   @NotBlank(message = "Email is required")
   @Email(message = "Email is invalid")
   private String email;
+
   private String phone;
 
-  @NotBlank(message = "Role is required")
-  private String role;
+  private UserRole role = UserRole.CUSTOMER;
 
   @NotBlank(message = "Password is required")
   private String password;
@@ -44,7 +45,7 @@ public class User {
   @UpdateTimestamp
   private LocalDateTime updatedAt;
 
-  public User(String fullName, String email, String phone, String role, String password, String username, LocalDateTime createdAt, LocalDateTime updatedAt) {
+  public User(String fullName, String email, String phone, UserRole role, String password, String username, LocalDateTime createdAt, LocalDateTime updatedAt) {
     this.fullName = fullName;
     this.username = username;
     this.email = email;
