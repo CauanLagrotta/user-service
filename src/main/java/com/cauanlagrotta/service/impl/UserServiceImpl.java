@@ -2,7 +2,9 @@ package com.cauanlagrotta.service.impl;
 
 import com.cauanlagrotta.exception.UserException;
 import com.cauanlagrotta.model.User;
+import com.cauanlagrotta.payload.dto.KeycloakUserDTO;
 import com.cauanlagrotta.repository.UserRepository;
+import com.cauanlagrotta.service.KeycloakService;
 import com.cauanlagrotta.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,7 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
 
   private final UserRepository userRepository;
+  private final KeycloakService keycloakService;
 
   @Override
   public User createUser(User user) {
@@ -58,5 +61,11 @@ public class UserServiceImpl implements UserService {
       throw new UserException("User not found");
     }
     userRepository.deleteById(id);
+  }
+
+  @Override
+  public User getUserFromJwt(String jwt) {
+    KeycloakUserDTO keycloakUserDTO = keycloakService.fetchUserProfileByJwt(jwt);
+    return userRepository.findByEmail(keycloakUserDTO.getEmail());
   }
 }
